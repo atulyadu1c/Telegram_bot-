@@ -1,6 +1,8 @@
 package com.example.transactions_bot;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,6 +41,10 @@ public class MyForceSubBot extends TelegramLongPollingBot {
             if (messageText.startsWith("/done")) {
                 sendSimpleMessage(chatId, "✅ Deal Completed And Logged Successfully");
             }
+
+             if (messageText.equalsIgnoreCase("/status")) {
+            showAdvancedStats(chatId);
+        }
         }
     }
 
@@ -150,4 +156,43 @@ public class MyForceSubBot extends TelegramLongPollingBot {
             return false;
         }
     }
+
+        private void showAdvancedStats(long chatId) {
+    LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+    // LocalDate totalDate = LocalDate.now();
+    
+    long totalDeals = dealRepository.count();
+    long completedDeals = dealRepository.countByStatus("SUCCESS");
+    Double totalAmount = dealRepository.getTotalEscrowedAmount();
+    Double totalFees = dealRepository.getTotalFees();
+    // LocalDate nowdate = totalDate;
+    
+    long todayDeals = dealRepository.countTodayDeals(startOfDay);
+    Double todayAmount = dealRepository.getTodayAmount(startOfDay);
+    if (todayAmount == null) todayAmount = 0.0;
+
+    // Success Rate Calculation
+    double successRate = (totalDeals > 0) ? ((double) completedDeals / totalDeals) * 100 : 0;
+
+    // Leaderboard logic (Top Admin)
+    List<Object[]> leaderboard = dealRepository.getAdminLeaderboard();
+    String topAdmin = (leaderboard != null && !leaderboard.isEmpty()) ? (String) leaderboard.get(0)[0] : "N/A";
+
+    String statsMessage = "📊 <b>ESCROW DASHBOARD (PRO)</b>\n" +
+            "──────────────────\n" +
+            "📈 <b>Success Rate:</b> " + String.format("%.1f", successRate) + "%\n" +
+            "💼 <b>Total Deals:</b> " + totalDeals + "\n" +
+            "💰 <b>Total Volume:</b> ₹" + String.format("%.2f", totalAmount != null ? totalAmount : 0) + "\n" +
+            "💵 <b>Total Profit (1% Fees):</b> ₹" + String.format("%.2f", totalFees != null ? totalFees : 0) + "\n" +
+            "──────────────────\n" +
+            "📅 <b>TODAY'S STATS</b>\n" +
+            "✅ <b>Deals:</b> " + todayDeals + "\n" +
+            "💰 <b>Amount:</b> ₹" + String.format("%.2f", todayAmount) + "\n" +
+            "──────────────────\n" +
+            "🏆 <b>Top Admin:</b> " + topAdmin + "\n\n" +
+            "📊 Data Recorded: " + LocalDate.now() +"\n"+
+            "🚀 @TRADEGO_MARKET";
+
+    sendSimpleMessage(chatId, statsMessage);
 }
+    }
