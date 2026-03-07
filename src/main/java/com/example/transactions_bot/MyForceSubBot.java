@@ -39,7 +39,12 @@ public class MyForceSubBot extends TelegramLongPollingBot {
             }
 
             if (messageText.startsWith("/done")) {
-                sendSimpleMessage(chatId, "✅ Deal Completed And Logged Successfully");
+                if (isAdmin(chatId, userId)) {
+                    // Yahan aap apna deal complete karne ka logic likh sakte hain
+                    sendSimpleMessage(chatId, "✅ <b>Deal Completed:</b> Transaction has been logged successfully by Admin.");
+                } else {
+                    sendSimpleMessage(chatId, "❌ <b>Access Denied:</b> Sirf Admins hi deals complete kar sakte hain.");
+                }
             }
 
              if (messageText.equalsIgnoreCase("/status")) {
@@ -48,6 +53,7 @@ public class MyForceSubBot extends TelegramLongPollingBot {
         }
     }
 
+    
     private void handleTransaction(Update update, long chatId, String messageText) {
         try {
             if (update.getMessage().getReplyToMessage() == null) {
@@ -61,6 +67,8 @@ public class MyForceSubBot extends TelegramLongPollingBot {
                 sendSimpleMessage(chatId, "⚠️ <b>Format:</b> <code>/add 100</code>");
                 return;
             }
+
+            
             
             // --- FEES CHANGE START ---
             float baseAmount = Float.parseFloat(parts[1]);
