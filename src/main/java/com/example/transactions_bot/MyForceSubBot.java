@@ -16,28 +16,56 @@ public class MyForceSubBot extends TelegramLongPollingBot {
     private DealRepository dealRepository;
     
     @Override
-    public String getBotUsername() { return "Atul_Transactions_bot"; }
+    public String getBotUsername() { return "TRADEGO_INRBOT"; }
 
     @Override
-    public String getBotToken() { return "8750243799:AAGFqPj-cr22UEOsLYXpoHIk5pg8kWRbDbE"; }
+    public String getBotToken() { return "8703836614:AAG-Z1rqKSAT38RQYbNaqWAJfRhVfdV-BZo"; }
 
-   @Override
+ @Override
 public void onUpdateReceived(Update update) {
     if (update.hasMessage() && update.getMessage().hasText()) {
-        String messageText = update.getMessage().getText();
         long chatId = update.getMessage().getChatId();
         long userId = update.getMessage().getFrom().getId();
+        String messageText = update.getMessage().getText();
 
-        if (messageText.startsWith("/add")) {
-            if (isAdmin(chatId, userId)) {
-                handleTransaction(update, chatId, messageText);
-            } else {
-                sendSimpleMessage(chatId, "❌ <b>Access Denied:</b> Sirf Admins hi deals add kar sakte hain.");
+        // 1. APNE GROUP KI ID YAHAN DALO
+        // long MY_ALLOWED_GROUP_ID = -1002547026266L; // <--- Apni sahi ID yahan dalo
+
+        // // 2. CHECK: Kya ye wahi group hai?
+        // if (chatId != MY_ALLOWED_GROUP_ID) {
+        //     // Agar koi aur group mein add kare toh bot reply na kare ya leave kar de
+        //     return; 
+        // }
+
+        // 3. CHECK: Kya bhejne wala ADMIN hai?
+        // Humne jo 'isAdmin' method pehle banaya tha, wahi use karenge
+        if (!isAdmin(chatId, userId)) {
+            // Agar normal member command chalaye toh use mana kar do
+            if (messageText.startsWith("/")) {
+                sendSimpleMessage(chatId, "❌ <b>Access Denied:</b> Sirf group Admins hi commands use kar sakte hain.");
             }
+            return;
+        }
+
+        // --- AB SARE ADMINS KE LIYE COMMANDS CHALENGI ---
+        if (messageText.startsWith("/add")) {
+            handleTransaction(update, chatId, messageText);
         } 
         else if (messageText.equalsIgnoreCase("/status")) {
             showAdvancedStats(chatId);
         }
+    }
+}
+
+// Bot ko group se bahar nikalne ka method
+private void leaveChat(long chatId) {
+    try {
+        org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat leave = 
+            new org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat();
+        leave.setChatId(String.valueOf(chatId));
+        execute(leave);
+    } catch (TelegramApiException e) {
+        e.printStackTrace();
     }
 }
 
