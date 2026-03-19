@@ -8,6 +8,13 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface DealRepository extends JpaRepository<Deal, Long>{
     
+// Sirf Pending Deals ka total amount
+@Query("SELECT SUM(d.amount) FROM Deal d WHERE d.status = 'PENDING'")
+Double getTotalPendingAmount();
+
+// Purani queries ko update karo taaki wo sirf SUCCESS count karein
+
+    List<Deal> findByUserNameAndChatIdAndStatus(String userName, long chatId, String status);
     // Total stats ke liye
     long countByStatus(String status);
     
@@ -27,4 +34,6 @@ public interface DealRepository extends JpaRepository<Deal, Long>{
     // Leaderboard logic
     @Query("SELECT d.adminName, COUNT(d) as dealCount FROM Deal d GROUP BY d.adminName ORDER BY dealCount DESC")
     List<Object[]> getAdminLeaderboard();
+
+    
 }
