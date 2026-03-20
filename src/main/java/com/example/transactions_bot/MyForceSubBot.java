@@ -28,31 +28,25 @@ public void onUpdateReceived(Update update) {
         long userId = update.getMessage().getFrom().getId();
         String messageText = update.getMessage().getText();
 
-        // 1. APNE GROUP KI ID YAHAN DALO
-        // long MY_ALLOWED_GROUP_ID = -1002547026266L; // <--- Apni sahi ID yahan dalo
-
-        // // 2. CHECK: Kya ye wahi group hai?
-        // if (chatId != MY_ALLOWED_GROUP_ID) {
-        //     // Agar koi aur group mein add kare toh bot reply na kare ya leave kar de
-        //     return; 
-        // }
-
-        // 3. CHECK: Kya bhejne wala ADMIN hai?
-        // Humne jo 'isAdmin' method pehle banaya tha, wahi use karenge
-        if (!isAdmin(chatId, userId)) {
-            // Agar normal member command chalaye toh use mana kar do
-            if (messageText.startsWith("/")) {
-                sendSimpleMessage(chatId, "❌ <b>Access Denied:</b> Sirf group Admins hi commands use kar sakte hain.");
-            }
-            return;
+        // 1. PRIVATE GROUP LOCK (Uncomment and add your ID)
+        long MY_ALLOWED_GROUP_ID = -1002547026266L; 
+        if (chatId != MY_ALLOWED_GROUP_ID) {
+            return; 
         }
 
-        // --- AB SARE ADMINS KE LIYE COMMANDS CHALENGI ---
-        if (messageText.startsWith("/add")) {
-            handleTransaction(update, chatId, messageText);
-        } 
-        else if (messageText.equalsIgnoreCase("/status")) {
+        // 2. PUBLIC COMMANDS (Inhe koi bhi use kar sakta hai)
+        if (messageText.equalsIgnoreCase("/status")) {
             showAdvancedStats(chatId);
+            return; // Status dikhane ke baad function yahi khatam ho jaye
+        }
+
+        // 3. ADMIN-ONLY COMMANDS (Sirf Admins ke liye)
+        if (messageText.startsWith("/add")) {
+            if (isAdmin(chatId, userId)) {
+                handleTransaction(update, chatId, messageText);
+            } else {
+                sendSimpleMessage(chatId, "❌ <b>Access Denied:</b> Sirf group Admins hi deals add kar sakte hain.");
+            }
         }
     }
 }
