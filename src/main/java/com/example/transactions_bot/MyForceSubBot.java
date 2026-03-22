@@ -28,28 +28,31 @@ public void onUpdateReceived(Update update) {
         long userId = update.getMessage().getFrom().getId();
         String messageText = update.getMessage().getText();
 
-        // 1. PRIVATE GROUP LOCK (Uncomment and add your ID)
-        long MY_ALLOWED_GROUP_ID = -1002547026266L; 
-        if (chatId != MY_ALLOWED_GROUP_ID) {
-            return; 
-        }
+        long MY_ALLOWED_GROUP_ID = -1003773723369L; 
+        if (chatId != MY_ALLOWED_GROUP_ID) return; 
 
-        // 2. PUBLIC COMMANDS (Inhe koi bhi use kar sakta hai)
+        // 1. PUBLIC COMMANDS
         if (messageText.equalsIgnoreCase("/status")) {
             showAdvancedStats(chatId);
-            return; // Status dikhane ke baad function yahi khatam ho jaye
+            return;
         }
 
-        // 3. ADMIN-ONLY COMMANDS (Sirf Admins ke liye)
-        if (messageText.startsWith("/add")) {
-            if (isAdmin(chatId, userId)) {
+        // 2. ADMIN-ONLY COMMANDS
+        if (isAdmin(chatId, userId)) {
+            if (messageText.startsWith("/add")) {
                 handleTransaction(update, chatId, messageText);
-            } else {
-                sendSimpleMessage(chatId, "❌ <b>Access Denied:</b> Sirf group Admins hi deals add kar sakte hain.");
+            } 
+            else if (messageText.equalsIgnoreCase("/done")) {
+                // Naya method call: Bina amount likhe sirf reply karke add karna
+                sendSimpleMessage(chatId, "✅ <b> Deal Completed:</b> Transaction has been logged successfully by Admin");
             }
+        } else if (messageText.startsWith("/")) {
+            sendSimpleMessage(chatId, "❌ <b>Access Denied:</b> Sirf group Admins hi deals add kar sakte hain.");
         }
     }
 }
+
+
 
 // Bot ko group se bahar nikalne ka method
 private void leaveChat(long chatId) {
