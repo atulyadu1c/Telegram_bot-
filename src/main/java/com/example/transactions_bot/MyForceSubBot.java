@@ -28,7 +28,7 @@ public void onUpdateReceived(Update update) {
         long userId = update.getMessage().getFrom().getId();
         String messageText = update.getMessage().getText();
 
-        long MY_ALLOWED_GROUP_ID = -1003773723369L; 
+        long MY_ALLOWED_GROUP_ID = -1002547026266L; 
         if (chatId != MY_ALLOWED_GROUP_ID) return; 
 
         // 1. PUBLIC COMMANDS
